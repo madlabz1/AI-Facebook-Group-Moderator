@@ -70,7 +70,7 @@
 
     /* Header Nav */
     .deck-header {
-      padding: 24px 32px;
+      padding: 20px 32px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       display: flex;
       justify-content: space-between;
@@ -81,24 +81,11 @@
     .logo-block {
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 700;
-      font-size: 1.2rem;
-      background: linear-gradient(135deg, #fff 40%, var(--text-secondary) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
     }
 
-    .logo-icon {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-md - 4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    .logo-img {
+      height: 26px;
+      width: auto;
     }
 
     .print-btn {
@@ -157,7 +144,7 @@
       flex: 1.2;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
     }
 
     .slide-visual-side {
@@ -180,7 +167,7 @@
 
     .slide-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.2rem;
+      font-size: 2.1rem;
       font-weight: 800;
       line-height: 1.2;
       background: linear-gradient(135deg, #fff 50%, var(--text-secondary) 100%);
@@ -189,8 +176,8 @@
     }
 
     .slide-desc {
-      font-size: 0.95rem;
-      line-height: 1.6;
+      font-size: 0.92rem;
+      line-height: 1.5;
       color: var(--text-secondary);
     }
 
@@ -198,21 +185,21 @@
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-top: 10px;
+      gap: 10px;
+      margin-top: 5px;
     }
 
     .slide-point-item {
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      font-size: 0.9rem;
-      line-height: 1.5;
+      font-size: 0.88rem;
+      line-height: 1.4;
     }
 
     .slide-point-item svg {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       stroke: var(--success);
       margin-top: 3px;
       flex-shrink: 0;
@@ -241,7 +228,7 @@
       transform: scale(1.05);
     }
 
-    /* Score Meter Simulation Visual (Slide 3) */
+    /* Score Meter Simulation Visual (Slide 4) */
     .metric-simulation-box {
       width: 100%;
       max-width: 340px;
@@ -284,7 +271,7 @@
 
     /* Controls Bar footer */
     .deck-footer {
-      padding: 24px 32px;
+      padding: 20px 32px;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       display: flex;
       justify-content: space-between;
@@ -321,8 +308,8 @@
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.08);
       color: var(--text-primary);
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       cursor: pointer;
       display: flex;
@@ -351,6 +338,17 @@
       gap: 20px;
     }
 
+    .intro-logo-box {
+      max-width: 240px;
+      margin-bottom: 8px;
+      animation: logo-float 3.5s ease-in-out infinite;
+    }
+
+    .intro-logo-box img {
+      width: 100%;
+      height: auto;
+    }
+
     .intro-badge {
       background: rgba(99, 102, 241, 0.1);
       border: 1px solid rgba(99, 102, 241, 0.3);
@@ -359,26 +357,12 @@
       font-size: 0.8rem;
       font-weight: 600;
       color: #a5b4fc;
-      margin-bottom: 8px;
     }
 
-    .pulse-glow-icon {
-      width: 72px;
-      height: 72px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      border-radius: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
-      animation: icon-float 3s ease-in-out infinite;
-    }
-
-    @keyframes icon-float {
-      0% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-8px) rotate(5deg); }
-      100% { transform: translateY(0px) rotate(0deg); }
+    @keyframes logo-float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+      100% { transform: translateY(0px); }
     }
 
     /* PRINT LAYOUT BROCHURE STYLE */
@@ -399,7 +383,7 @@
       }
 
       .deck-header, .deck-footer {
-        display: none !important; /* Hide controls during print */
+        display: none !important;
       }
 
       .slides-wrapper {
@@ -416,7 +400,7 @@
         pointer-events: auto !important;
         color: #111 !important;
         height: auto !important;
-        padding: 60px 40px !important;
+        padding: 40px 20px !important;
         border-bottom: 1px solid #ddd !important;
       }
 
@@ -448,7 +432,6 @@
         background: #e2e8f0 !important;
       }
 
-      /* Enable background print colors */
       * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -463,10 +446,7 @@
     <!-- Header -->
     <header class="deck-header">
       <div class="logo-block">
-        <div class="logo-icon">
-          <i data-lucide="shield" style="stroke: #fff; width: 18px; height: 18px;"></i>
-        </div>
-        <span>AI MODERATOR SYSTEM GUIDE</span>
+        <img class="logo-img" src="./assets/logo.png" alt="Madlabz Logo">
       </div>
       <button class="print-btn" onclick="window.print()">
         <i data-lucide="printer" style="width: 16px; height: 16px;"></i>
@@ -479,24 +459,52 @@
       
       <!-- Slide 1: Welcome -->
       <section class="slide intro-slide active" id="slide-0">
-        <div class="pulse-glow-icon">
-          <i data-lucide="cpu" style="width: 36px; height: 36px; stroke: #fff;"></i>
+        <div class="intro-logo-box">
+          <img src="./assets/logo.png" alt="Madlabz Logo">
         </div>
-        <div class="intro-badge">Smart Group Moderation</div>
-        <h2 class="slide-title" style="font-size: 2.8rem;">How Your AI Assistant Works</h2>
-        <p class="slide-desc" style="max-width: 600px;">A plain-English guide demonstrating how our system screens posts, calculates safety risk levels, protects community guidelines, and learns from human moderator reviews.</p>
+        <div class="intro-badge">Smart Group Moderation Suite</div>
+        <h2 class="slide-title" style="font-size: 2.4rem; margin-top: 10px;">How the AI Assistant Works</h2>
+        <p class="slide-desc" style="max-width: 600px;">A plain-English guide demonstrating how our system automatically handles Facebook browser scanning, scores safety compliance, and calibrates itself to your style.</p>
       </section>
 
-      <!-- Slide 2: Ingestion & Scan -->
+      <!-- Slide 2: Browser Automation Layer -->
       <section class="slide" id="slide-1">
         <div class="slide-text-side">
           <span class="slide-step">Step 01</span>
-          <h2 class="slide-title">Read, Filter & Verify</h2>
-          <p class="slide-desc">The AI automatically monitors posts and entry applications in the background, checking content against multiple security parameters:</p>
+          <h2 class="slide-title">Browser Automation Layer</h2>
+          <p class="slide-desc">Before AI can analyze any content, the system must securely retrieve it. The Browser Automation layer operates as the hands and eyes of the system:</p>
+          <ul class="slide-points-list">
+            <li class="slide-point-item">
+              <i data-lucide="monitor"></i>
+              <span><strong>Group Navigation</strong>: Automatically logs in and navigates directly to your Facebook Group's moderation and admin queues.</span>
+            </li>
+            <li class="slide-point-item">
+              <i data-lucide="eye"></i>
+              <span><strong>Data Extraction</strong>: Pulls post texts, photos, external hyperlinks, profile details (account age, warnings), and entry application answers.</span>
+            </li>
+            <li class="slide-point-item">
+              <i data-lucide="shield-alert"></i>
+              <span><strong>Human Emulation</strong>: Operates with natural delays and scroll intervals to mimic human usage, protecting group accounts from platform blocks.</span>
+            </li>
+          </ul>
+        </div>
+        <div class="slide-visual-side">
+          <div class="visual-card-frame">
+            <img src="./assets/ai_scan.png" alt="Browser Automation Layer Concept">
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3: Ingestion & Scan -->
+      <section class="slide" id="slide-2">
+        <div class="slide-text-side">
+          <span class="slide-step">Step 02</span>
+          <h2 class="slide-title">AI Screening & Verification</h2>
+          <p class="slide-desc">Once retrieved by the browser layer, the AI inspects the text, links, and member profiles:</p>
           <ul class="slide-points-list">
             <li class="slide-point-item">
               <i data-lucide="shield-check"></i>
-              <span><strong>Spam Vocabulary</strong>: Scans text for click-bait phrases, money-making claims, or Telegram funnel tags.</span>
+              <span><strong>Spam Vocabulary</strong>: Scans text for click-bait phrases, money-making claims, or Telegram/WhatsApp funnel tags.</span>
             </li>
             <li class="slide-point-item">
               <i data-lucide="shield-check"></i>
@@ -504,21 +512,21 @@
             </li>
             <li class="slide-point-item">
               <i data-lucide="shield-check"></i>
-              <span><strong>Guidelines Compliance</strong>: Cross-references post topics with your active rules (e.g. banning self-promotion).</span>
+              <span><strong>Guidelines Compliance</strong>: Cross-references post topics with your active rules (e.g. banning self-promotion or cryptocurrency ads).</span>
             </li>
           </ul>
         </div>
         <div class="slide-visual-side">
           <div class="visual-card-frame">
-            <img src="./assets/ai_scan.png" alt="AI Scanning Concept Illustration">
+            <img src="./assets/ai_scan.png" alt="AI Ingestion Concept">
           </div>
         </div>
       </section>
 
-      <!-- Slide 3: Scoring Math -->
-      <section class="slide" id="slide-2">
+      <!-- Slide 4: Scoring Math -->
+      <section class="slide" id="slide-3">
         <div class="slide-text-side">
-          <span class="slide-step">Step 02</span>
+          <span class="slide-step">Step 03</span>
           <h2 class="slide-title">Evaluate & Rank Risk</h2>
           <p class="slide-desc">Rather than guessing, the AI parses inputs and compiles mathematical ratings between 0% and 100%:</p>
           <ul class="slide-points-list">
@@ -577,12 +585,12 @@
         </div>
       </section>
 
-      <!-- Slide 4: Learning Loop -->
-      <section class="slide" id="slide-3">
+      <!-- Slide 5: Learning Loop -->
+      <section class="slide" id="slide-4">
         <div class="slide-text-side">
-          <span class="slide-step">Step 03</span>
-          <h2 class="slide-title">Calibrate & Learn</h2>
-          <p class="slide-desc">Humans always retain override power. When you override the AI recommendation, the learning system immediately updates:</p>
+          <span class="slide-step">Step 04</span>
+          <h2 class="slide-title">The Smart Learning Loop</h2>
+          <p class="slide-desc">The system adapts to your unique group's style in real-time. When a moderator overrides the AI's recommendation, it calibrates itself:</p>
           <ul class="slide-points-list">
             <li class="slide-point-item">
               <i data-lucide="refresh-cw"></i>
@@ -600,7 +608,7 @@
         </div>
         <div class="slide-visual-side">
           <div class="visual-card-frame">
-            <img src="./assets/learning_loop.png" alt="Smart Calibration Neural Network Loop Illustration">
+            <img src="./assets/learning_loop.png" alt="Smart Calibration Neural Network Loop">
           </div>
         </div>
       </section>
@@ -654,7 +662,6 @@
     });
 
     function goToSlide(index) {
-      // Toggle transition status classes
       slides[currentSlideIndex].classList.remove('active');
       if (index < currentSlideIndex) {
         slides[currentSlideIndex].classList.remove('prev');
@@ -666,25 +673,22 @@
       slides[currentSlideIndex].classList.add('active');
       slides[currentSlideIndex].classList.remove('prev');
 
-      // Update dots indicators active classes
       dots.forEach((dot, idx) => {
         if (idx === currentSlideIndex) dot.classList.add('active');
         else dot.classList.remove('active');
       });
 
-      // Update buttons disable status
       btnPrev.disabled = currentSlideIndex === 0;
       btnNext.disabled = currentSlideIndex === totalSlides - 1;
 
-      // Trigger metric loading animation if we navigate to slide 3 (index 2)
-      if (currentSlideIndex === 2) {
+      // Trigger metric loading animation if we navigate to slide 4 (index 3)
+      if (currentSlideIndex === 3) {
         animateMetricBars();
       } else {
         resetMetricBars();
       }
     }
 
-    // Dynamic bar fill simulation for Slide 3
     function animateMetricBars() {
       setTimeout(() => {
         const barSpam = document.getElementById('sim-bar-spam');
