@@ -149,6 +149,7 @@ const elements = {
 document.addEventListener('DOMContentLoaded', () => {
   initQueue();
   setupEventListeners();
+  setupFacebookConnection();
   switchView('dashboard');
   lucide.createIcons();
 });
@@ -1259,4 +1260,176 @@ function showToast(message, type = "success") {
     toast.style.transition = '0.3s ease';
     setTimeout(() => toast.remove(), 300);
   }, 4000);
+}
+
+// FACEBOOK SYSTEM CONNECTION CENTER
+function setupFacebookConnection() {
+  const tabBtnCookie = document.getElementById('tab-btn-cookie');
+  const tabBtnLogin = document.getElementById('tab-btn-login');
+  const connCookieFields = document.getElementById('conn-cookie-fields');
+  const connLoginFields = document.getElementById('conn-login-fields');
+  
+  const inputCUser = document.getElementById('input-c-user');
+  const inputXs = document.getElementById('input-xs');
+  const btnConnectCookie = document.getElementById('btn-connect-cookie');
+  
+  const inputFbEmail = document.getElementById('input-fb-email');
+  const inputFbPass = document.getElementById('input-fb-pass');
+  const btnConnectLogin = document.getElementById('btn-connect-login');
+  
+  const fbConnIndicator = document.getElementById('fb-conn-indicator');
+  const fbConnStatusText = document.getElementById('fb-conn-status-text');
+  const fbConnSubtext = document.getElementById('fb-conn-subtext');
+  const btnDisconnectFb = document.getElementById('btn-disconnect-fb');
+  
+  const tfaModal = document.getElementById('tfa-modal');
+  const inputTfaCode = document.getElementById('input-tfa-code');
+  const btnTfaCancel = document.getElementById('btn-tfa-cancel');
+  const btnTfaConfirm = document.getElementById('btn-tfa-confirm');
+
+  if (!tabBtnCookie) return; // Guard clause in case element missing
+
+  // Tab switching
+  tabBtnCookie.addEventListener('click', () => {
+    tabBtnCookie.style.background = 'var(--primary-glow)';
+    tabBtnCookie.style.borderColor = 'var(--primary)';
+    tabBtnCookie.style.fontWeight = '600';
+    tabBtnLogin.style.background = 'transparent';
+    tabBtnLogin.style.borderColor = 'var(--border-color)';
+    tabBtnLogin.style.fontWeight = '500';
+    connCookieFields.style.display = 'flex';
+    connLoginFields.style.display = 'none';
+  });
+
+  tabBtnLogin.addEventListener('click', () => {
+    tabBtnLogin.style.background = 'var(--primary-glow)';
+    tabBtnLogin.style.borderColor = 'var(--primary)';
+    tabBtnLogin.style.fontWeight = '600';
+    tabBtnCookie.style.background = 'transparent';
+    tabBtnCookie.style.borderColor = 'var(--border-color)';
+    tabBtnCookie.style.fontWeight = '500';
+    connLoginFields.style.display = 'flex';
+    connCookieFields.style.display = 'none';
+  });
+
+  // State Management Helper
+  function setConnected(name, method) {
+    fbConnIndicator.style.backgroundColor = 'var(--success)';
+    fbConnIndicator.style.boxShadow = '0 0 10px var(--success)';
+    fbConnStatusText.innerText = 'Connected';
+    fbConnSubtext.innerText = `Logged in as ${name} via ${method}`;
+    btnDisconnectFb.style.display = 'block';
+    
+    // Hide inputs
+    connCookieFields.style.display = 'none';
+    connLoginFields.style.display = 'none';
+    tabBtnCookie.parentElement.style.display = 'none';
+    
+    localStorage.setItem('fb_conn_state', JSON.stringify({ connected: true, name, method }));
+  }
+
+  function setDisconnected() {
+    fbConnIndicator.style.backgroundColor = 'var(--text-muted)';
+    fbConnIndicator.style.boxShadow = 'none';
+    fbConnStatusText.innerText = 'Disconnected';
+    fbConnSubtext.innerText = 'Operating in simulation mode';
+    btnDisconnectFb.style.display = 'none';
+    
+    // Restore default view
+    tabBtnCookie.parentElement.style.display = 'flex';
+    tabBtnCookie.click();
+    
+    // Clear inputs
+    inputCUser.value = '';
+    inputXs.value = '';
+    inputFbEmail.value = '';
+    inputFbPass.value = '';
+    
+    localStorage.removeItem('fb_conn_state');
+  }
+
+  // Load initial state
+  const savedState = localStorage.getItem('fb_conn_state');
+  if (savedState) {
+    const state = JSON.parse(savedState);
+    if (state.connected) {
+      setConnected(state.name, state.method);
+    }
+  }
+
+  // Connect via Cookie Handler
+  btnConnectCookie.addEventListener('click', () => {
+    const cUserVal = inputCUser.value.trim();
+    const xsVal = inputXs.value.trim();
+    
+    if (!cUserVal || !xsVal) {
+      alert('Please fill out both c_user and xs cookie tokens to establish session connection.');
+      return;
+    }
+
+    btnConnectCookie.disabled = true;
+    btnConnectCookie.innerHTML = '<i class="pulsing"></i> Connecting to browser...';
+    
+    // Simulate natural browser cookie ingestion
+    setTimeout(() => {
+      btnConnectCookie.disabled = false;
+      btnConnectCookie.innerHTML = '<i data-lucide="link-2"></i> Connect via Cookies';
+      lucide.createIcons();
+      
+      setConnected('Madlabz Admin', 'Session Cookies');
+      showToast('Facebook automation browser successfully authenticated using cookies!', 'success');
+    }, 1500);
+  });
+
+  // Connect via Password Handler
+  btnConnectLogin.addEventListener('click', () => {
+    const emailVal = inputFbEmail.value.trim();
+    const passVal = inputFbPass.value.trim();
+    
+    if (!emailVal || !passVal) {
+      alert('Please enter your Facebook username/email and password.');
+      return;
+    }
+
+    btnConnectLogin.disabled = true;
+    btnConnectLogin.innerHTML = 'Opening browser...';
+    
+    setTimeout(() => {
+      btnConnectLogin.innerHTML = 'Submitting credentials...';
+      setTimeout(() => {
+        btnConnectLogin.disabled = false;
+        btnConnectLogin.innerHTML = '<i data-lucide="log-in"></i> Secure Connect';
+        lucide.createIcons();
+        
+        tfaModal.classList.add('active');
+        inputTfaCode.value = '';
+      }, 1200);
+    }, 1000);
+  });
+
+  // 2FA Actions
+  btnTfaCancel.addEventListener('click', () => {
+    tfaModal.classList.remove('active');
+    showToast('Connection cancelled. 2FA verification required.', 'warning');
+  });
+
+  btnTfaConfirm.addEventListener('click', () => {
+    const code = inputTfaCode.value.trim();
+    if (!code || code.length < 6) {
+      alert('Please enter a valid 6-digit confirmation code.');
+      return;
+    }
+
+    tfaModal.classList.remove('active');
+    setConnected('Madlabz Admin', 'Secure Credentials (2FA)');
+    showToast('Facebook account successfully connected via secure credentials!', 'success');
+  });
+
+  // Disconnect Handler
+  btnDisconnectFb.addEventListener('click', () => {
+    if (confirm('Are you sure you want to disconnect your Facebook profile from the automation browser?')) {
+      setDisconnected();
+      showToast('Facebook account disconnected. System returned to simulation mode.', 'info');
+    }
+  });
 }

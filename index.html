@@ -535,6 +535,65 @@
         <div class="app-view" id="view-settings">
           <div class="dashboard-grid">
             
+            <!-- Facebook Account Connection Center -->
+            <div class="dashboard-panel" id="fb-conn-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">Facebook Connection Center</h2>
+                <i data-lucide="key" style="color: var(--primary);"></i>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+                Connect your admin Facebook profile to start automated scanning of your group.
+              </p>
+              
+              <!-- Tab togglers -->
+              <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 6px;">
+                <button class="select-custom" id="tab-btn-cookie" style="flex: 1; font-weight: 600; background: var(--primary-glow); border-color: var(--primary);">Session Cookies</button>
+                <button class="select-custom" id="tab-btn-login" style="flex: 1; font-weight: 500;">Direct Login</button>
+              </div>
+
+              <!-- Cookie connection block -->
+              <div id="conn-cookie-fields" style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label">c_user Cookie Token</label>
+                  <input type="text" class="input-custom" id="input-c-user" placeholder="e.g. 10008472819...">
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label">xs Cookie Token</label>
+                  <input type="password" class="input-custom" id="input-xs" placeholder="e.g. 43%3Afb%3A2%3A16...">
+                </div>
+                <button class="btn btn-success" id="btn-connect-cookie" style="width: 100%; padding: 10px;">
+                  <i data-lucide="link-2"></i> Connect via Cookies
+                </button>
+              </div>
+
+              <!-- Credentials connection block -->
+              <div id="conn-login-fields" style="display: none; flex-direction: column; gap: 12px;">
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label">Facebook Email / Username</label>
+                  <input type="text" class="input-custom" id="input-fb-email" placeholder="email@address.com">
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label class="form-label">Facebook Password</label>
+                  <input type="password" class="input-custom" id="input-fb-pass" placeholder="••••••••••••">
+                </div>
+                <button class="btn btn-success" id="btn-connect-login" style="width: 100%; padding: 10px;">
+                  <i data-lucide="log-in"></i> Secure Connect
+                </button>
+              </div>
+
+              <!-- Connection Status Area -->
+              <div id="fb-conn-status-card" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="status-indicator" id="fb-conn-indicator" style="background-color: var(--text-muted); box-shadow: none;"></span>
+                  <div>
+                    <div style="font-size: 0.82rem; font-weight: 600;" id="fb-conn-status-text">Disconnected</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);" id="fb-conn-subtext">Operating in simulation mode</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline" id="btn-disconnect-fb" style="display: none; padding: 6px 12px; font-size: 0.75rem; flex: none;">Disconnect</button>
+              </div>
+            </div>
+
             <!-- AI Scoring Threshold Settings -->
             <div class="dashboard-panel">
               <div class="panel-header">
@@ -684,6 +743,27 @@
       <div class="modal-buttons">
         <button class="btn btn-outline" id="btn-override-cancel">Cancel</button>
         <button class="btn btn-success" id="btn-override-confirm" style="flex: none; width: 140px;">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TWO-FACTOR AUTHENTICATION DIALOG -->
+  <div class="modal-overlay" id="tfa-modal">
+    <div class="modal-content">
+      <h3 class="modal-title" style="display: flex; align-items: center; gap: 10px;">
+        <i data-lucide="shield-check" style="stroke: var(--primary);"></i>
+        <span>Two-Factor Authentication</span>
+      </h3>
+      <p class="modal-desc">Facebook has requested a login confirmation code. Please enter the 6-digit code from your authenticator app or mobile SMS below to complete the connection.</p>
+      
+      <div class="form-group">
+        <label class="form-label">6-Digit Security Code</label>
+        <input type="text" class="input-custom" id="input-tfa-code" placeholder="e.g. 123456" style="text-align: center; font-size: 1.25rem; letter-spacing: 6px; font-weight: 700;" maxlength="6">
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn btn-outline" id="btn-tfa-cancel">Cancel</button>
+        <button class="btn btn-success" id="btn-tfa-confirm" style="flex: none; width: 140px;">Verify Code</button>
       </div>
     </div>
   </div>
