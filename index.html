@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Facebook Group Moderation Dashboard</title>
+  <link rel="stylesheet" href="./style.css">
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-container" style="justify-content: flex-start; gap: 10px; margin-bottom: 24px;">
+        <img src="./assets/logo.png" alt="Madlabz Logo" style="height: 24px; width: auto; max-width: 100%;">
+      </div>
+      
+      <nav class="nav-menu">
+        <li class="nav-item">
+          <div class="nav-link active" data-view="dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Moderation Queue</span>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="nav-link" data-view="simulator">
+            <i data-lucide="terminal"></i>
+            <span>Post Simulator</span>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="nav-link" data-view="analytics">
+            <i data-lucide="bar-chart-3"></i>
+            <span>Analytics Panel</span>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="nav-link" data-view="logs">
+            <i data-lucide="history"></i>
+            <span>Learning Logs</span>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="nav-link" data-view="settings">
+            <i data-lucide="settings"></i>
+            <span>Rules & Settings</span>
+          </div>
+        </li>
+      </nav>
+      
+      <!-- Automation Status Card -->
+      <div class="automation-status-card">
+        <div class="status-label">System Mode</div>
+        <div class="status-value" id="status-mode-label">
+          <span class="status-indicator" id="status-mode-indicator"></span>
+          <span>Recommendation</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Bar -->
+      <header class="topbar">
+        <h1 class="page-title" id="page-title-text">Moderation Queue</h1>
+        <div class="topbar-right">
+          <div class="badge-pill pulsing" id="queue-count-badge">
+            <i data-lucide="inbox"></i>
+            <span id="queue-badge-count">0</span> items pending
+          </div>
+        </div>
+      </header>
+
+      <!-- View Container -->
+      <div class="view-container">
+        
+        <!-- DASHBOARD VIEW -->
+        <div class="app-view active" id="view-dashboard">
+          <div class="dashboard-layout">
+            
+            <!-- Left Pane: Queue Feed -->
+            <section class="queue-pane">
+              <div class="queue-controls">
+                
+                <div class="filter-group">
+                  <span class="control-label">Filter:</span>
+                  <select class="select-custom" id="filter-decision">
+                    <option value="ALL">All Decisions</option>
+                    <option value="APPROVE">Approve Only</option>
+                    <option value="REVIEW">Review Only</option>
+                    <option value="REJECT">Reject Only</option>
+                  </select>
+                  
+                  <select class="select-custom" id="filter-risk">
+                    <option value="ALL">All Risk Levels</option>
+                    <option value="LOW_VERY_LOW">Low / Very Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH_CRITICAL">High / Critical</option>
+                  </select>
+                </div>
+
+                <div class="filter-group">
+                  <span class="control-label">Sort:</span>
+                  <select class="select-custom" id="sort-order">
+                    <option value="RISK_DESC">Highest Risk First</option>
+                    <option value="CONFIDENCE_ASC">Lowest Confidence First</option>
+                    <option value="ENGAGEMENT_DESC">Highest Engagement First</option>
+                    <option value="SPAM_DESC">Most Spam-Like First</option>
+                  </select>
+                </div>
+                
+              </div>
+              
+              <div class="queue-feed" id="queue-feed-list">
+                <!-- Dynamic Queue Cards injected here -->
+              </div>
+            </section>
+            
+            <!-- Right Pane: Inspect Element Details -->
+            <section class="inspect-pane" id="inspect-details-pane">
+              <!-- Default state when nothing selected -->
+              <div class="inspect-empty" id="inspect-placeholder">
+                <i data-lucide="eye-off"></i>
+                <p>Select a post or membership request from the queue to inspect details and take action.</p>
+              </div>
+              
+              <!-- Content structure when selected -->
+              <div class="inspect-content" id="inspect-full-content" style="display: none;">
+                
+                <div class="inspect-header">
+                  <div class="inspect-title-wrapper">
+                    <h2 class="inspect-title" id="inspect-author-name">Sarah Jenkins</h2>
+                    <div class="post-type-badge" id="inspect-post-type">
+                      <i data-lucide="file-text"></i> POST
+                    </div>
+                  </div>
+                  <span class="inspect-decision-badge badge-approve" id="inspect-decision-badge">Approve</span>
+                </div>
+                
+                <div class="inspect-scroll-area">
+                  
+                  <!-- Tags List -->
+                  <div class="tags-list" id="inspect-tags-list">
+                    <!-- Dynamic tag badges -->
+                  </div>
+
+                  <!-- Scores Grid -->
+                  <div class="inspect-scoring-grid">
+                    
+                    <div class="metric-bar-group">
+                      <div class="metric-header">
+                        <span class="metric-label">Spam Probability</span>
+                        <span class="metric-value" id="val-spam-score">0%</span>
+                      </div>
+                      <div class="metric-track">
+                        <div class="metric-fill color-spam" id="bar-spam-score" style="width: 0%;"></div>
+                      </div>
+                    </div>
+                    
+                    <div class="metric-bar-group">
+                      <div class="metric-header">
+                        <span class="metric-label">Safety Risk Level</span>
+                        <span class="metric-value" id="val-risk-score">0%</span>
+                      </div>
+                      <div class="metric-track">
+                        <div class="metric-fill color-risk" id="bar-risk-score" style="width: 0%;"></div>
+                      </div>
+                    </div>
+                    
+                    <div class="metric-bar-group">
+                      <div class="metric-header">
+                        <span class="metric-label">Rule Compliance</span>
+                        <span class="metric-value" id="val-compliance-score">100%</span>
+                      </div>
+                      <div class="metric-track">
+                        <div class="metric-fill color-compliance" id="bar-compliance-score" style="width: 100%;"></div>
+                      </div>
+                    </div>
+
+                    <div class="metric-bar-group">
+                      <div class="metric-header">
+                        <span class="metric-label">Quality Score</span>
+                        <span class="metric-value" id="val-quality-score">0%</span>
+                      </div>
+                      <div class="metric-track">
+                        <div class="metric-fill color-quality" id="bar-quality-score" style="width: 0%;"></div>
+                      </div>
+                    </div>
+
+                    <div class="metric-bar-group">
+                      <div class="metric-header">
+                        <span class="metric-label">Trust Score</span>
+                        <span class="metric-value" id="val-trust-score">0%</span>
+                      </div>
+                      <div class="metric-track">
+                        <div class="metric-fill" id="bar-trust-score" style="width: 0%; background: var(--info);"></div>
+                      </div>
+                    </div>
+
+                    <div class="metric-bar-group">
+                      <div class="metric-header">
+                        <span class="metric-label">AI Confidence</span>
+                        <span class="metric-value" id="val-confidence-score">0%</span>
+                      </div>
+                      <div class="metric-track">
+                        <div class="metric-fill" id="bar-confidence-score" style="width: 0%; background: var(--secondary);"></div>
+                      </div>
+                    </div>
+                    
+                  </div>
+                  
+                  <!-- Profile context stats -->
+                  <div class="profile-context-card">
+                    <div class="profile-stat-box">
+                      <span class="profile-stat-val" id="profile-acc-age">0 days</span>
+                      <span class="profile-stat-lbl">Account Age</span>
+                    </div>
+                    <div class="profile-stat-box">
+                      <span class="profile-stat-val" id="profile-past-history">0 app / 0 rej</span>
+                      <span class="profile-stat-lbl">Past History</span>
+                    </div>
+                    <div class="profile-stat-box">
+                      <span class="profile-stat-val" id="profile-warnings">0</span>
+                      <span class="profile-stat-lbl">Warnings</span>
+                    </div>
+                  </div>
+
+                  <!-- Post Body Content -->
+                  <div class="inspect-post-box">
+                    <span class="post-content-label">Post Content</span>
+                    <div class="post-content-body" id="inspect-post-body">...</div>
+                  </div>
+
+                  <!-- Optional Membership Answers -->
+                  <div class="inspect-post-box" id="membership-answers-wrapper" style="display: none;">
+                    <span class="post-content-label">Membership Entry Answers</span>
+                    <div class="membership-answers-container" id="inspect-membership-answers">
+                      <!-- Injected Q&As -->
+                    </div>
+                  </div>
+
+                  <!-- Optional Links list -->
+                  <div class="inspect-links-box" id="inspect-links-wrapper" style="display: none;">
+                    <span class="post-content-label">Extracted Links</span>
+                    <div id="inspect-links-list">
+                      <!-- Injected Links -->
+                    </div>
+                  </div>
+
+                  <!-- Optional Images list -->
+                  <div class="inspect-images-box" id="inspect-images-wrapper" style="display: none;">
+                    <span class="post-content-label">Extracted Images</span>
+                    <div class="inspect-images-box" id="inspect-images-list">
+                      <!-- Injected Images -->
+                    </div>
+                  </div>
+
+                  <!-- AI Explanation Card -->
+                  <div class="reasoning-box">
+                    <div class="reasoning-title">
+                      <i data-lucide="brain"></i>
+                      <span>AI Reasoning Analysis</span>
+                    </div>
+                    <p class="reasoning-desc" id="val-primary-reason"></p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <span style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">Signals Context</span>
+                      <ul class="signals-list" id="inspect-signals-list">
+                        <!-- Dynamic LI markers -->
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- Safety flags -->
+                  <div class="flags-grid" id="inspect-flags-grid">
+                    <div class="flag-badge" id="flag-spam">Spam</div>
+                    <div class="flag-badge" id="flag-scam">Scam</div>
+                    <div class="flag-badge" id="flag-promotion">Promotion</div>
+                    <div class="flag-badge" id="flag-toxicity">Toxicity</div>
+                    <div class="flag-badge" id="flag-rule_violation">Rule Violation</div>
+                    <div class="flag-badge" id="flag-suspicious_links">Suspicious Link</div>
+                  </div>
+
+                  <!-- Raw JSON Toggle -->
+                  <div>
+                    <button class="json-toggle-btn" id="json-toggle-btn">
+                      <i data-lucide="code"></i> Show Raw JSON schema
+                    </button>
+                    <pre class="raw-json-block" id="raw-json-block"></pre>
+                  </div>
+
+                </div>
+
+                <!-- Action Button Footers -->
+                <div class="inspect-actions">
+                  <button class="btn btn-success" id="btn-approve">
+                    <i data-lucide="check"></i> Approve
+                  </button>
+                  <button class="btn btn-danger" id="btn-reject">
+                    <i data-lucide="x"></i> Reject
+                  </button>
+                  <button class="btn btn-outline" id="btn-override">
+                    <i data-lucide="rotate-ccw"></i> Override AI
+                  </button>
+                </div>
+                
+              </div>
+            </section>
+            
+          </div>
+        </div>
+
+        <!-- POST SIMULATOR VIEW -->
+        <div class="app-view" id="view-simulator">
+          <div class="dashboard-grid">
+            
+            <!-- Preset Scenario Loader -->
+            <div class="dashboard-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">Preset Scenarios</h2>
+                <i data-lucide="database" style="color: var(--primary);"></i>
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5;">Click any pre-configured post template below to instantly load its details into the simulator form.</p>
+              
+              <div class="template-grid" id="preset-templates-list">
+                <!-- Preset Templates Loaded here -->
+              </div>
+            </div>
+
+            <!-- Custom Creator Form -->
+            <div class="dashboard-panel" style="grid-column: span 2;">
+              <div class="panel-header">
+                <h2 class="panel-title">Post & Membership Request Creator</h2>
+                <i data-lucide="plus-circle" style="color: var(--success);"></i>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                
+                <div class="form-group">
+                  <label class="form-label">Submission Type</label>
+                  <select class="select-custom" id="sim-type">
+                    <option value="post">Group Post</option>
+                    <option value="membership_request">Membership Request</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Author Name</label>
+                  <input type="text" class="input-custom" id="sim-author" value="Mark Zuckerberg">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Account Age (Days)</label>
+                  <input type="number" class="input-custom" id="sim-acc-age" value="365">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Past Approvals</label>
+                  <input type="number" class="input-custom" id="sim-past-app" value="1">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Past Rejections</label>
+                  <input type="number" class="input-custom" id="sim-past-rej" value="0">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Active Warnings</label>
+                  <input type="number" class="input-custom" id="sim-warnings" value="0">
+                </div>
+
+              </div>
+
+              <!-- Links & Images Section -->
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;" id="sim-assets-fields">
+                <div class="form-group">
+                  <label class="form-label">Attach External Link (Comma-separated)</label>
+                  <input type="text" class="input-custom" id="sim-links" placeholder="e.g. https://t.me/freegold">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Attach Image URL (Comma-separated)</label>
+                  <input type="text" class="input-custom" id="sim-images" placeholder="e.g. https://images.com/flyer.jpg">
+                </div>
+              </div>
+
+              <!-- Membership Answers Form (conditionally shown) -->
+              <div id="sim-membership-answers-fields" style="display: none; background: rgba(0, 0, 0, 0.1); padding: 16px; border-radius: var(--radius-md); gap: 12px; flex-direction: column;">
+                <span class="post-content-label" style="margin-bottom: 6px; display: block;">Membership Entry Answers</span>
+                <div class="form-group">
+                  <label class="form-label">Question 1: Experience level?</label>
+                  <input type="text" class="input-custom" id="sim-q1" value="Intermediate JavaScript developer.">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Question 2: Why join?</label>
+                  <input type="text" class="input-custom" id="sim-q2" value="To discuss React architecture and network.">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Question 3: Follow rules?</label>
+                  <input type="text" class="input-custom" id="sim-q3" value="Yes, I agree to follow all group rules.">
+                </div>
+              </div>
+
+              <div class="form-group" id="sim-post-text-field">
+                <label class="form-label">Post Content Text</label>
+                <textarea class="textarea-custom" id="sim-text" placeholder="Write custom post body text here..."></textarea>
+              </div>
+
+              <button class="btn btn-success" style="align-self: flex-end;" id="btn-sim-submit">
+                <i data-lucide="send"></i> Inject into Moderation Queue
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ANALYTICS VIEW -->
+        <div class="app-view" id="view-analytics">
+          
+          <!-- Quick stats row -->
+          <div class="analytics-grid">
+            
+            <div class="analytics-stat-card">
+              <div class="stat-icon-wrapper" style="background: var(--primary-glow); color: var(--primary);">
+                <i data-lucide="eye"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-total">0</span>
+                <span class="stat-lbl">Processed</span>
+              </div>
+            </div>
+
+            <div class="analytics-stat-card">
+              <div class="stat-icon-wrapper" style="background: var(--success-glow); color: var(--success);">
+                <i data-lucide="check-circle-2"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-approval-rate">0%</span>
+                <span class="stat-lbl">Approval Rate</span>
+              </div>
+            </div>
+
+            <div class="analytics-stat-card">
+              <div class="stat-icon-wrapper" style="background: var(--warning-glow); color: var(--warning);">
+                <i data-lucide="alert-triangle"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-override-rate">0%</span>
+                <span class="stat-lbl">Override Rate</span>
+              </div>
+            </div>
+
+            <div class="analytics-stat-card">
+              <div class="stat-icon-wrapper" style="background: var(--info-glow); color: var(--info);">
+                <i data-lucide="clock"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number" id="stat-time-saved">0 min</span>
+                <span class="stat-lbl">Est. Time Saved</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Charts panels -->
+          <div class="charts-grid">
+            
+            <div class="chart-card">
+              <h2 class="panel-title" style="margin-bottom: 16px;">Decision Distribution</h2>
+              <div class="chart-wrapper">
+                <canvas id="chart-decisions"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <h2 class="panel-title" style="margin-bottom: 16px;">Top Rejection Violations</h2>
+              <div class="chart-wrapper">
+                <canvas id="chart-violations"></canvas>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Empty Analytics Panel Placeholder -->
+          <div class="empty-queue-message" id="analytics-placeholder" style="display: none;">
+            <i data-lucide="bar-chart-3"></i>
+            <h3>No Analytics Data Yet</h3>
+            <p>Once you start approving, rejecting or overriding items in the moderation queue, analytics charts will render here.</p>
+          </div>
+
+        </div>
+
+        <!-- LEARNING LOGS VIEW -->
+        <div class="app-view" id="view-logs">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <p style="font-size: 0.88rem; color: var(--text-secondary);">History of all decisions processed, showing alignment between AI suggestions and moderator overrides.</p>
+            <button class="btn btn-outline" style="padding: 8px 16px; font-size: 0.8rem;" id="btn-clear-logs">
+              <i data-lucide="trash-2"></i> Clear History
+            </button>
+          </div>
+
+          <div class="logs-table-wrapper">
+            <table class="logs-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Author</th>
+                  <th>Content Summary</th>
+                  <th>AI Decision</th>
+                  <th>Human Decision</th>
+                  <th>Override?</th>
+                  <th>Override Reason</th>
+                </tr>
+              </thead>
+              <tbody id="logs-table-body">
+                <!-- Log entries injected here -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="empty-queue-message" id="logs-empty-message" style="display: none; height: 250px;">
+            <i data-lucide="clock"></i>
+            <h3>No Decision History Logged</h3>
+            <p>Processed queue items will log their metrics, thresholds, and override calibration steps here.</p>
+          </div>
+
+        </div>
+
+        <!-- RULES & SETTINGS VIEW -->
+        <div class="app-view" id="view-settings">
+          <div class="dashboard-grid">
+            
+            <!-- AI Scoring Threshold Settings -->
+            <div class="dashboard-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">Automation & Thresholds</h2>
+                <i data-lucide="sliders" style="color: var(--primary);"></i>
+              </div>
+
+              <!-- Automation Mode Option Buttons -->
+              <div class="form-group">
+                <label class="form-label" style="margin-bottom: 12px;">Active Automation Mode</label>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  
+                  <label class="rule-item" style="cursor: pointer; padding: 12px;">
+                    <div style="display: flex; align-items: flex-start; gap: 12px;">
+                      <input type="radio" name="auto-mode" value="OBSERVATION" style="margin-top: 3px;">
+                      <div class="rule-info">
+                        <span class="rule-name">Observation Mode (Passive)</span>
+                        <span class="rule-keywords">AI analyses patterns and compiles files but yields no active recommendation tags.</span>
+                      </div>
+                    </div>
+                  </label>
+
+                  <label class="rule-item" style="cursor: pointer; padding: 12px;">
+                    <div style="display: flex; align-items: flex-start; gap: 12px;">
+                      <input type="radio" name="auto-mode" value="RECOMMENDATION" checked style="margin-top: 3px;">
+                      <div class="rule-info">
+                        <span class="rule-name">Recommendation Mode (Default)</span>
+                        <span class="rule-keywords">AI tags decisions, scores risk factors, and requests human confirmation.</span>
+                      </div>
+                    </div>
+                  </label>
+
+                  <label class="rule-item" style="cursor: pointer; padding: 12px;">
+                    <div style="display: flex; align-items: flex-start; gap: 12px;">
+                      <input type="radio" name="auto-mode" value="AUTO" style="margin-top: 3px;">
+                      <div class="rule-info">
+                        <span class="rule-name">Auto-Pilot Mode</span>
+                        <span class="rule-keywords">AI automatically auto-approves safe posts and auto-rejects clear violations (confidence > 95%).</span>
+                      </div>
+                    </div>
+                  </label>
+
+                </div>
+              </div>
+
+              <!-- Core thresholds editor -->
+              <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 18px;">
+                <span class="post-content-label">Score Action Thresholds</span>
+                
+                <div class="form-group" style="margin-bottom: 10px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 500;">
+                    <span style="color: var(--text-secondary);">Max Spam Score for auto-approve</span>
+                    <span id="lbl-thresh-spam">20%</span>
+                  </div>
+                  <input type="range" min="5" max="50" value="20" class="slider-range" id="input-thresh-spam" style="width:100%; margin-top: 8px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 10px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 500;">
+                    <span style="color: var(--text-secondary);">Max Risk Score for auto-approve</span>
+                    <span id="lbl-thresh-risk">30%</span>
+                  </div>
+                  <input type="range" min="10" max="60" value="30" class="slider-range" id="input-thresh-risk" style="width:100%; margin-top: 8px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 10px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 500;">
+                    <span style="color: var(--text-secondary);">Min Rule Compliance for auto-approve</span>
+                    <span id="lbl-thresh-compliance">80%</span>
+                  </div>
+                  <input type="range" min="50" max="95" value="80" class="slider-range" id="input-thresh-compliance" style="width:100%; margin-top: 8px;">
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- Group Rules Config -->
+            <div class="dashboard-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">Group Guideline Rules</h2>
+                <i data-lucide="book-open" style="color: var(--secondary);"></i>
+              </div>
+              
+              <div class="rules-list" id="settings-rules-list">
+                <!-- Group Rules items loaded here -->
+              </div>
+              
+              <div style="border-top: 1px solid var(--border-color); padding-top: 18px; margin-top: 10px; display: flex; flex-direction: column; gap: 12px;">
+                <span class="post-content-label">Add Custom Guideline Rule</span>
+                <input type="text" class="input-custom" id="rule-add-name" placeholder="Rule Name (e.g. No Affiliate links)">
+                <input type="text" class="input-custom" id="rule-add-kw" placeholder="Trigger Keywords (comma-separated)">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                  <label class="form-label" style="margin: 0; white-space: nowrap;">Severity (1-100):</label>
+                  <input type="number" min="10" max="100" value="30" class="input-custom" id="rule-add-severity" style="width: 80px;">
+                  <button class="btn btn-success" id="btn-add-rule" style="flex-grow: 1; padding: 10px;">Add Rule</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Learning Vocab Panel -->
+            <div class="dashboard-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">Vocabulary Weight Matrix</h2>
+                <i data-lucide="cpu" style="color: var(--warning);"></i>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 8px;">
+                These weights directly feed the AI spam & promotion scores. When you override a decision, weights calibrate dynamically.
+              </p>
+              
+              <div class="weights-container" id="vocab-weights-list">
+                <!-- Word weight lists loaded here -->
+              </div>
+
+              <button class="btn btn-outline" style="width: 100%; margin-top: 8px;" id="btn-reset-weights">
+                <i data-lucide="rotate-ccw"></i> Reset Weight Parameters
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- MODAL: OVERRIDE DECISION DIALOG -->
+  <div class="modal-overlay" id="override-modal">
+    <div class="modal-content">
+      <h3 class="modal-title">Override AI Recommendation</h3>
+      <p class="modal-desc">You are overriding the AI recommendation. Please select your final decision and specify your reasoning so the feedback engine can calibrate future models.</p>
+      
+      <div class="form-group">
+        <label class="form-label">Final Decision Override</label>
+        <select class="select-custom" id="override-decision-select" style="width: 100%;">
+          <option value="APPROVE">Approve Submission</option>
+          <option value="REJECT">Reject Submission</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Override Reason / Context</label>
+        <textarea class="textarea-custom" id="override-reason-text" placeholder="Explain why this post is acceptable/unacceptable (e.g. Legitimate developer tutorial, trusted sponsor, repetitive link spam, off-topic)..."></textarea>
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn btn-outline" id="btn-override-cancel">Cancel</button>
+        <button class="btn btn-success" id="btn-override-confirm" style="flex: none; width: 140px;">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Load App Core -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

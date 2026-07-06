@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Facebook Moderator - How It Works Guide</title>
+  <!-- Outfit / Jakarta Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --bg-base: #060913;
+      --bg-surface: rgba(15, 23, 42, 0.45);
+      --bg-surface-solid: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --primary: #6366f1;
+      --secondary: #a855f7;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    /* Deck Wrapper Card */
+    .deck-container {
+      width: 100%;
+      max-width: 960px;
+      min-height: 580px;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s ease;
+    }
+
+    /* Header Nav */
+    .deck-header {
+      padding: 24px 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    .logo-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, #fff 40%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-icon {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md - 4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    }
+
+    .print-btn {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      color: #c7d2fe;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .print-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Slides View Container */
+    .slides-wrapper {
+      flex-grow: 1;
+      position: relative;
+      display: flex;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 40px 48px;
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      opacity: 0;
+      transform: translateX(100px);
+      pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .slide.prev {
+      transform: translateX(-100px);
+    }
+
+    .slide-text-side {
+      flex: 1.2;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .slide-visual-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Animations elements */
+    .slide-step {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .slide-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #fff 50%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slide-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .slide-points-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .slide-point-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .slide-point-item svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--success);
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+
+    .visual-card-frame {
+      width: 100%;
+      max-width: 360px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      background: var(--bg-card);
+      position: relative;
+    }
+
+    .visual-card-frame img {
+      width: 100%;
+      display: block;
+      height: auto;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+
+    .visual-card-frame:hover img {
+      transform: scale(1.05);
+    }
+
+    /* Score Meter Simulation Visual (Slide 3) */
+    .metric-simulation-box {
+      width: 100%;
+      max-width: 340px;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sim-bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sim-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .sim-bar-track {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .sim-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    /* Controls Bar footer */
+    .deck-footer {
+      padding: 24px 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    .dot-indicators {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: var(--primary);
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    .navigation-btns {
+      display: flex;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    /* INTRO SLIDE CUSTOM LAYOUT */
+    .intro-slide {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .intro-badge {
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #a5b4fc;
+      margin-bottom: 8px;
+    }
+
+    .pulse-glow-icon {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
+      animation: icon-float 3s ease-in-out infinite;
+    }
+
+    @keyframes icon-float {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(5deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    /* PRINT LAYOUT BROCHURE STYLE */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #111 !important;
+        padding: 0 !important;
+        background-image: none !important;
+      }
+      
+      .deck-container {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+      }
+
+      .deck-header, .deck-footer {
+        display: none !important; /* Hide controls during print */
+      }
+
+      .slides-wrapper {
+        display: block !important;
+        overflow: visible !important;
+      }
+
+      .slide {
+        position: static !important;
+        display: flex !important;
+        page-break-after: always !important;
+        opacity: 1 !important;
+        transform: none !important;
+        pointer-events: auto !important;
+        color: #111 !important;
+        height: auto !important;
+        padding: 60px 40px !important;
+        border-bottom: 1px solid #ddd !important;
+      }
+
+      .slide-title {
+        background: none !important;
+        -webkit-text-fill-color: initial !important;
+        color: #0f172a !important;
+      }
+
+      .slide-desc {
+        color: #334155 !important;
+      }
+
+      .slide-point-item {
+        color: #334155 !important;
+      }
+
+      .visual-card-frame {
+        border: 1px solid #ccc !important;
+        background: #f8fafc !important;
+      }
+
+      .metric-simulation-box {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+      }
+      
+      .sim-bar-track {
+        background: #e2e8f0 !important;
+      }
+
+      /* Enable background print colors */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck-container">
+    
+    <!-- Header -->
+    <header class="deck-header">
+      <div class="logo-block">
+        <div class="logo-icon">
+          <i data-lucide="shield" style="stroke: #fff; width: 18px; height: 18px;"></i>
+        </div>
+        <span>AI MODERATOR SYSTEM GUIDE</span>
+      </div>
+      <button class="print-btn" onclick="window.print()">
+        <i data-lucide="printer" style="width: 16px; height: 16px;"></i>
+        <span>Save / Print PDF Brochure</span>
+      </button>
+    </header>
+
+    <!-- Slides Viewport -->
+    <div class="slides-wrapper">
+      
+      <!-- Slide 1: Welcome -->
+      <section class="slide intro-slide active" id="slide-0">
+        <div class="pulse-glow-icon">
+          <i data-lucide="cpu" style="width: 36px; height: 36px; stroke: #fff;"></i>
+        </div>
+        <div class="intro-badge">Smart Group Moderation</div>
+        <h2 class="slide-title" style="font-size: 2.8rem;">How Your AI Assistant Works</h2>
+        <p class="slide-desc" style="max-width: 600px;">A plain-English guide demonstrating how our system screens posts, calculates safety risk levels, protects community guidelines, and learns from human moderator reviews.</p>
+      </section>
+
+      <!-- Slide 2: Ingestion & Scan -->
+      <section class="slide" id="slide-1">
+        <div class="slide-text-side">
+          <span class="slide-step">Step 01</span>
+          <h2 class="slide-title">Read, Filter & Verify</h2>
+          <p class="slide-desc">The AI automatically monitors posts and entry applications in the background, checking content against multiple security parameters:</p>
+          <ul class="slide-points-list">
+            <li class="slide-point-item">
+              <i data-lucide="shield-check"></i>
+              <span><strong>Spam Vocabulary</strong>: Scans text for click-bait phrases, money-making claims, or Telegram funnel tags.</span>
+            </li>
+            <li class="slide-point-item">
+              <i data-lucide="shield-check"></i>
+              <span><strong>Links & Media Scan</strong>: Inspects links to block shortened redirects, fake giveaways, and phishing portals.</span>
+            </li>
+            <li class="slide-point-item">
+              <i data-lucide="shield-check"></i>
+              <span><strong>Guidelines Compliance</strong>: Cross-references post topics with your active rules (e.g. banning self-promotion).</span>
+            </li>
+          </ul>
+        </div>
+        <div class="slide-visual-side">
+          <div class="visual-card-frame">
+            <img src="./assets/ai_scan.png" alt="AI Scanning Concept Illustration">
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3: Scoring Math -->
+      <section class="slide" id="slide-2">
+        <div class="slide-text-side">
+          <span class="slide-step">Step 02</span>
+          <h2 class="slide-title">Evaluate & Rank Risk</h2>
+          <p class="slide-desc">Rather than guessing, the AI parses inputs and compiles mathematical ratings between 0% and 100%:</p>
+          <ul class="slide-points-list">
+            <li class="slide-point-item">
+              <i data-lucide="trending-up"></i>
+              <span><strong>Risk Assessment</strong>: High risk weights trigger on new accounts or members with warnings history.</span>
+            </li>
+            <li class="slide-point-item">
+              <i data-lucide="trending-up"></i>
+              <span><strong>Confidence Score</strong>: Shows the AI's certainty. Clear spam or helpful posts yield high confidence ratings.</span>
+            </li>
+            <li class="slide-point-item">
+              <i data-lucide="trending-up"></i>
+              <span><strong>Human Queue Action</strong>: Sorts posts from highest-risk first, recommending Approve, Reject, or manual Review.</span>
+            </li>
+          </ul>
+        </div>
+        <div class="slide-visual-side">
+          <!-- Interactive animated metrics simulation panel -->
+          <div class="metric-simulation-box">
+            <div style="font-size: 0.9rem; font-weight: 700; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 4px;">
+              <i data-lucide="bar-chart-2" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px; stroke: var(--primary);"></i>
+              AI Scoring Analysis
+            </div>
+            
+            <div class="sim-bar-item">
+              <div class="sim-bar-label">
+                <span>Spam Probability</span>
+                <span id="sim-val-spam">0%</span>
+              </div>
+              <div class="sim-bar-track">
+                <div class="sim-bar-fill" id="sim-bar-spam" style="background: var(--danger);"></div>
+              </div>
+            </div>
+            
+            <div class="sim-bar-item">
+              <div class="sim-bar-label">
+                <span>Safety Risk Level</span>
+                <span id="sim-val-risk">0%</span>
+              </div>
+              <div class="sim-bar-track">
+                <div class="sim-bar-fill" id="sim-bar-risk" style="background: var(--warning);"></div>
+              </div>
+            </div>
+
+            <div class="sim-bar-item">
+              <div class="sim-bar-label">
+                <span>Rule Compliance</span>
+                <span id="sim-val-compliance">0%</span>
+              </div>
+              <div class="sim-bar-track">
+                <div class="sim-bar-fill" id="sim-bar-compliance" style="background: var(--success);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4: Learning Loop -->
+      <section class="slide" id="slide-3">
+        <div class="slide-text-side">
+          <span class="slide-step">Step 03</span>
+          <h2 class="slide-title">Calibrate & Learn</h2>
+          <p class="slide-desc">Humans always retain override power. When you override the AI recommendation, the learning system immediately updates:</p>
+          <ul class="slide-points-list">
+            <li class="slide-point-item">
+              <i data-lucide="refresh-cw"></i>
+              <span><strong>Vocabulary Adjustments</strong>: Decrements trigger word weights when you approve misclassified items.</span>
+            </li>
+            <li class="slide-point-item">
+              <i data-lucide="refresh-cw"></i>
+              <span><strong>Reputation Weighting</strong>: Bumps author trust factor on manual approval, making future reviews faster.</span>
+            </li>
+            <li class="slide-point-item">
+              <i data-lucide="refresh-cw"></i>
+              <span><strong>Zero Loss Retention</strong>: Keeps detailed log histories to trace override trends and save moderator time.</span>
+            </li>
+          </ul>
+        </div>
+        <div class="slide-visual-side">
+          <div class="visual-card-frame">
+            <img src="./assets/learning_loop.png" alt="Smart Calibration Neural Network Loop Illustration">
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Navigation Footer Controls -->
+    <footer class="deck-footer">
+      <div class="dot-indicators" id="deck-dots">
+        <!-- Dots injected here -->
+      </div>
+      
+      <div class="navigation-btns">
+        <button class="nav-btn" id="btn-deck-prev" disabled>
+          <i data-lucide="chevron-left"></i>
+        </button>
+        <button class="nav-btn" id="btn-deck-next">
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Slider Deck Logic
+    const slides = document.querySelectorAll('.slide');
+    const dotsContainer = document.getElementById('deck-dots');
+    const btnPrev = document.getElementById('btn-deck-prev');
+    const btnNext = document.getElementById('btn-deck-next');
+    
+    let currentSlideIndex = 0;
+    const totalSlides = slides.length;
+
+    // Create dot indicators
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = `dot ${i === 0 ? 'active' : ''}`;
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    }
+    
+    const dots = document.querySelectorAll('.dot');
+
+    btnPrev.addEventListener('click', () => {
+      if (currentSlideIndex > 0) goToSlide(currentSlideIndex - 1);
+    });
+
+    btnNext.addEventListener('click', () => {
+      if (currentSlideIndex < totalSlides - 1) goToSlide(currentSlideIndex + 1);
+    });
+
+    function goToSlide(index) {
+      // Toggle transition status classes
+      slides[currentSlideIndex].classList.remove('active');
+      if (index < currentSlideIndex) {
+        slides[currentSlideIndex].classList.remove('prev');
+      } else {
+        slides[currentSlideIndex].classList.add('prev');
+      }
+
+      currentSlideIndex = index;
+      slides[currentSlideIndex].classList.add('active');
+      slides[currentSlideIndex].classList.remove('prev');
+
+      // Update dots indicators active classes
+      dots.forEach((dot, idx) => {
+        if (idx === currentSlideIndex) dot.classList.add('active');
+        else dot.classList.remove('active');
+      });
+
+      // Update buttons disable status
+      btnPrev.disabled = currentSlideIndex === 0;
+      btnNext.disabled = currentSlideIndex === totalSlides - 1;
+
+      // Trigger metric loading animation if we navigate to slide 3 (index 2)
+      if (currentSlideIndex === 2) {
+        animateMetricBars();
+      } else {
+        resetMetricBars();
+      }
+    }
+
+    // Dynamic bar fill simulation for Slide 3
+    function animateMetricBars() {
+      setTimeout(() => {
+        const barSpam = document.getElementById('sim-bar-spam');
+        const valSpam = document.getElementById('sim-val-spam');
+        barSpam.style.width = '82%';
+        animateCounter(valSpam, 82);
+
+        const barRisk = document.getElementById('sim-bar-risk');
+        const valRisk = document.getElementById('sim-val-risk');
+        barRisk.style.width = '55%';
+        animateCounter(valRisk, 55);
+
+        const barComp = document.getElementById('sim-bar-compliance');
+        const valComp = document.getElementById('sim-val-compliance');
+        barComp.style.width = '24%';
+        animateCounter(valComp, 24);
+      }, 300);
+    }
+
+    function resetMetricBars() {
+      document.getElementById('sim-bar-spam').style.width = '0%';
+      document.getElementById('sim-val-spam').innerText = '0%';
+      
+      document.getElementById('sim-bar-risk').style.width = '0%';
+      document.getElementById('sim-val-risk').innerText = '0%';
+      
+      document.getElementById('sim-bar-compliance').style.width = '0%';
+      document.getElementById('sim-val-compliance').innerText = '0%';
+    }
+
+    function animateCounter(el, target) {
+      let count = 0;
+      const interval = setInterval(() => {
+        count++;
+        el.innerText = `${count}%`;
+        if (count >= target) clearInterval(interval);
+      }, 12);
+    }
+
+    // Initialize Lucide Icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
